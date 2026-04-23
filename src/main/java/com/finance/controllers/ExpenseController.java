@@ -53,5 +53,4 @@ public class ExpenseController {
             @RequestParam(required = false) String sort) {
         return ResponseEntity.ok(expenseService.getExpensesByDate(category, sort));
     }
-
 }
