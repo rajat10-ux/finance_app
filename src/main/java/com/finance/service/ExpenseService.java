@@ -5,8 +5,8 @@ import com.finance.Entity.Expense;
 import com.finance.Repository.ExpenseRepository;
 import com.finance.Request.ExpenseRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -23,6 +23,7 @@ public class ExpenseService {
                         a.getDate()
                 )).toList();
     }
+
     public ExpenseDTO createRequest(ExpenseRequest expenseRequest){
         Expense expense = new Expense();
         expense.setAmount(expenseRequest.getAmount());
@@ -37,5 +38,51 @@ public class ExpenseService {
                 savedExpense.getDescription(),
                 savedExpense.getDate()
         );
+    }
+
+    public List<ExpenseDTO> getExpenseByCategory(String category) {
+        return expenseRepository.findByCategoryIgnoreCase(category)
+                .stream()
+                .map(e -> new ExpenseDTO(
+                        e.getAmount(),
+                        e.getCategory(),
+                        e.getDescription(),
+                        e.getDate()
+                ))
+                .toList();
+    }
+
+    public List<ExpenseDTO> getExpensesByDate(String category, String sort) {
+        List<Expense> expenses;
+        if (category != null && !category.isBlank()) {
+            expenses = expenseRepository.findByCategoryIgnoreCase(category);
+        } else {
+            expenses = expenseRepository.findAll();
+        }
+        if ("date_desc".equalsIgnoreCase(sort)) {
+            expenses = expenses.stream()
+                    .sorted((a, b) -> {
+                        if (a.getDate() == null) return 1;
+                        if (b.getDate() == null) return -1;
+                        return b.getDate().compareTo(a.getDate());
+                    })
+                    .toList();
+        } else if ("date_asc".equalsIgnoreCase(sort)) {
+            expenses = expenses.stream()
+                    .sorted((a, b) -> {
+                        if (a.getDate() == null) return 1;
+                        if (b.getDate() == null) return -1;
+                        return a.getDate().compareTo(b.getDate());
+                    })
+                    .toList();
+        }
+        return expenses.stream()
+                .map(e -> new ExpenseDTO(
+                        e.getAmount(),
+                        e.getCategory(),
+                        e.getDescription(),
+                        e.getDate()
+                ))
+                .toList();
     }
 }

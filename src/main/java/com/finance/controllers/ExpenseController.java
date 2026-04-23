@@ -35,4 +35,23 @@ public class ExpenseController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/get_by_category/{category}")
+    public ResponseEntity<?>getExpenseByCategory(@PathVariable String category){
+        try {
+            List<ExpenseDTO> expenseByCategory = expenseService.getExpenseByCategory(category);
+            return new ResponseEntity<>(expenseByCategory,HttpStatus.FOUND);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/expenses_by_date")
+    public ResponseEntity<List<ExpenseDTO>> getExpenses(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String sort) {
+        return ResponseEntity.ok(expenseService.getExpensesByDate(category, sort));
+    }
+
 }
